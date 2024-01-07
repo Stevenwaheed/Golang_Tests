@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4"
 	"context"
+	"log"
 )
 
 type User struct{
@@ -21,6 +22,32 @@ type User struct{
 var dbURL = "postgres://postgres:S1122001:)@localhost:5432/postgres"
 
 // var db *sql.DB
+
+func createTable(c * gin.Context){
+	var createTableSQL = `
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        phone_number TEXT UNIQUE,
+        otp TEXT,
+        otp_expiration_time TIMESTAMP
+    )`
+
+
+	conn, err := pgx.Connect(context.Background(), dbURL)
+	if err != nil {
+		panic("Could not connect to database")
+	}
+
+	conn.Query(context.Background(), createTableSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.IndentedJSON(http.StatusOK, "Table 'users' created successfully.")
+}
+
+
 
 func setUserInfo(userName, phoneNumber string)User{
 	var user User
